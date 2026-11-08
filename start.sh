@@ -27,5 +27,5 @@ else:
     print("Admin creation skipped.")
 
 PY
-
+python manage.py import_questions question_bank/java_questions_full.csv
 exec gunicorn config.wsgi:application
