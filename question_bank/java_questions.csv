@@ -1,0 +1,3 @@
+unit,topic,question_text,option_a,option_b,option_c,option_d,correct_answer,explanation,difficulty
+UNIT_1,OOP,Which concept combines data and methods?,Inheritance,Encapsulation,Polymorphism,Abstraction,B,Encapsulation combines data and methods,EASY
+UNIT_1,Java Basics,Which component executes Java bytecode?,JDK,JVM,JRE,JAR,B,JVM executes Java bytecode,EASY

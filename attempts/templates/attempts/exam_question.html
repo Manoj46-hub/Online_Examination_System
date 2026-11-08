@@ -1,0 +1,579 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Intermediate Examination</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f4f9;
+            color: #263449;
+        }
+
+        header {
+            background: #123b70;
+            color: white;
+            padding: 18px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timer {
+            background: white;
+            color: #123b70;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .student-info {
+            background: white;
+            padding: 15px 25px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            padding: 22px;
+        }
+
+        .question-panel, .palette-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 22px;
+            box-shadow: 0 2px 8px #00000010;
+        }
+
+        .question-heading {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+
+        .question-text {
+            font-size: 17px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            margin-bottom: 25px;
+        }
+
+        .option {
+            display: flex;
+            gap: 12px;
+            padding: 15px;
+            border: 1px solid #d8deea;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .option:hover, .option.selected {
+            background: #edf5ff;
+            border-color: #1764bd;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .previous, .clear {
+            background: #e5e9f0;
+        }
+
+        .save {
+            background: #1764bd;
+            color: white;
+        }
+
+        .review {
+            background: #7545a8;
+            color: white;
+        }
+
+        .palette-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .palette-grid button {
+            padding: 12px 0;
+            border: none;
+            border-radius: 6px;
+            color: rgb(11, 1, 1);
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Answered */
+        .palette-grid button.status-answered {
+            background: #2fda8a;
+        }
+
+        /* Not answered */
+        .palette-grid button.status-not-visited {
+            background: #faf3f4;
+        }
+
+        /* Marked for review */
+        .palette-grid button.status-marked {
+            background: #9d6fec;
+        }
+
+        /* Current question */
+        .palette-grid button.current {
+            outline: 3px solid #1764bd;
+            outline-offset: 2px;
+        }
+
+        .answered {
+            background: #22a06b !important;
+            color: white;
+        }
+
+        .not-answered {
+            background: #dc4b4b !important;
+            color: white;
+        }
+
+        .marked {
+            background: #7545a8 !important;
+            color: white;
+        }
+
+        .legend {
+            margin-top: 22px;
+            font-size: 13px;
+            line-height: 2.2;
+        }
+
+        @media(max-width: 800px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+
+        
+       .submit-container {
+            display: flex;
+            justify-content: flex-end;
+            width: 100%;
+            margin-top: 25px;
+            margin-bottom: 20px;
+        }
+
+        .submit {
+            background-color: #dc3545;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>Java Intermediate Examination</h2>
+    <div class="timer" id="timer">Loading...</div>
+</header>
+
+<div class="student-info">
+    <strong>Candidate:</strong> {{ request.user.name }}
+    &nbsp; | &nbsp;
+    <strong>Roll Number:</strong> {{ request.user.username }}
+</div>
+
+<div class="container">
+
+    <section class="question-panel">
+
+        <div class="question-heading">
+            <h3>Question {{ question_number }} of {{ total_questions }}</h3>
+            <strong>{{ question.get_unit_display }}</strong>
+        </div>
+
+        <div class="question-text">{{ question.question_text }}</div>
+
+        <form id="answerForm"
+            data-save-url="{% url 'save_answer' attempt_id=attempt.id %}"
+            data-mark-url="{% url 'mark_for_review' attempt.id %}"
+            data-submit-url="{% url 'submit_exam' attempt.id %}"
+            data-auto-submit-url="{% url 'auto_submit_exam' attempt.id %}">
+            {% csrf_token %}
+
+            <input type="hidden"
+                name="question_id"
+                value="{{ question.id }}">
+
+            {% for option in options %}
+            <label class="option">
+                <input
+                    type="radio"
+                    name="answer"
+                    value="{{ option.label }}"
+                    {% if answer.is_answered and answer.selected_answer == option.label %}checked{% endif %}
+                >
+
+                <strong>{{ option.label }}.</strong>
+                <span>{{ option.text }}</span>
+            </label>
+            {% endfor %}
+        </form>
+
+        <div class="buttons">
+
+            {% if question_number > 1 %}
+            <button class="previous"
+                onclick="navigateTo({{ question_number|add:'-1' }})">
+                Previous
+            </button>
+            {% endif %}
+
+            <button type="button" class="save" onclick="saveAndNext()">
+                Save & Next
+            </button>
+
+            <button type="button" class="review" onclick="markForReview()">
+                Mark for Review & Next
+            </button>
+
+            <button type="button" class="clear" onclick="clearResponse()">
+                Clear Response
+            </button>
+
+            <div class="submit-container">
+                <button type="button" class="submit" onclick="submitExam()">
+                    Submit Exam
+                </button>
+            </div>
+
+        </div>
+
+
+    </section>
+
+    <aside class="palette-panel">
+
+        <h3>Question Palette</h3>
+
+        <div class="palette-grid">
+            {% for item in palette_items %}
+            <button
+                id="palette-{{ item.number }}"
+                class="status-{{ item.status }} {% if item.number == question_number %}current{% endif %}"
+                onclick="navigateTo({{ item.number }})">
+                {{ item.number }}
+            </button>
+            {% endfor %}
+        </div>
+
+        <div class="legend">
+            <p>🟢 Answered</p>
+            <p>🟣 Marked for Review</p>
+            <p>⚪ Not Answered</p>
+        </div>
+
+    </aside>
+
+</div>
+
+
+{{ attempt.end_time|date:'c'|json_script:"exam-end-time" }}
+
+<script>
+    const endTime = new Date(
+        JSON.parse(document.getElementById("exam-end-time").textContent)
+    ).getTime();
+
+    let timerInterval = null;
+    let autoSubmitStarted = false;
+
+    async function autoSubmitExam() {
+
+        if (autoSubmitStarted) return;
+
+        autoSubmitStarted = true;
+
+        const form = document.getElementById("answerForm");
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.dataset.autoSubmitUrl, {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert("Time is over! Your exam has been submitted.");
+                window.location.href =
+                    data.redirect_url || "/student-dashboard/";
+            } else {
+                autoSubmitStarted = false;
+                alert(data.error || "Automatic submission failed.");
+            }
+
+        } catch (error) {
+            autoSubmitStarted = false;
+            console.error(error);
+        }
+    }
+
+    function updateTimer() {
+
+        const remaining = Math.max(0, endTime - Date.now());
+
+        const hours = Math.floor(remaining / 3600000);
+        const minutes = Math.floor((remaining % 3600000) / 60000);
+        const seconds = Math.floor((remaining % 60000) / 1000);
+
+        document.getElementById("timer").textContent =
+            String(hours).padStart(2, "0") + ":" +
+            String(minutes).padStart(2, "0") + ":" +
+            String(seconds).padStart(2, "0");
+
+        if (remaining <= 0) {
+            document.getElementById("timer").textContent = "TIME OVER";
+            clearInterval(timerInterval);
+            autoSubmitExam();
+        }
+    }   
+
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
+
+    function navigateTo(number) {
+        window.location.href =
+            "/exam/" + "{{ attempt.id }}" +
+            "/question/" + number + "/";
+    }
+
+    function showMessage() {
+        alert("Answer saving will be connected in the next step.");
+    }
+
+    
+    function updatePaletteColor(status) {
+
+        const button = document.getElementById(
+            "palette-{{ question_number }}"
+        );
+
+        if (!button) return;
+
+        button.classList.remove(
+            "status-answered",
+            "status-not-visited",
+            "status-marked"
+        );
+
+        button.classList.add("status-" + status);
+    }
+
+    async function clearResponse() {
+
+        const form = document.getElementById("answerForm");
+        const formData = new FormData();
+
+        formData.append(
+            "question_id",
+            form.querySelector('[name="question_id"]').value
+        );
+
+        formData.append(
+            "csrfmiddlewaretoken",
+            form.querySelector('[name="csrfmiddlewaretoken"]').value
+        );
+
+        try {
+            const response = await fetch(
+                "{% url 'clear_answer' attempt.id %}",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+            const data = await response.json();
+
+            if (data.success) {
+                updatePaletteColor("not-visited");
+                document.querySelectorAll('input[name="answer"]')
+                    .forEach(input => input.checked = false);
+
+                alert("Response cleared successfully.");
+            } else {
+                alert(data.error || "Unable to clear response.");
+            }
+
+        } catch (error) {
+            alert("Something went wrong.");
+            console.error(error);
+        }
+    }
+
+    
+    async function saveAndNext() {
+
+        const form = document.getElementById("answerForm");
+        const selected = document.querySelector(
+            'input[name="answer"]:checked'
+        );
+
+        if (!selected) {
+            alert("Please select an answer first.");
+            return;
+        }
+
+        const formData = new FormData(form);
+        formData.append("selected_answer", selected.value);
+
+        try {
+            const response = await fetch(form.dataset.saveUrl, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                if ({{ question_number }} < {{ total_questions }}) {
+                    navigateTo({{ question_number }} + 1);
+                } else {
+                    alert("All questions completed!");
+                }
+            } else {
+                alert(data.error || "Unable to save answer.");
+            }
+
+        } catch (error) {
+            alert("Something went wrong while saving your answer.");
+            console.error(error);
+        }
+    }
+
+    async function markForReview() {
+
+        const form = document.getElementById("answerForm");
+        const selected = document.querySelector(
+            'input[name="answer"]:checked'
+        );
+
+        const formData = new FormData(form);
+
+        formData.append(
+            "question_id",
+            form.querySelector('[name="question_id"]').value
+        );
+
+        formData.append(
+            "selected_answer",
+            selected ? selected.value : ""
+        );
+
+        try {
+            const response = await fetch(form.dataset.markUrl, {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                updatePaletteColor("marked");
+                if ({{ question_number }} < {{ total_questions }}) {
+                    navigateTo({{ question_number }} + 1);
+                } else {
+                    alert("Question marked for review. You have reached the last question.");
+                }
+            } else {
+            alert(data.error || "Unable to mark question.");
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert("Something went wrong.");
+        }
+    }
+
+    
+    async function submitExam() {
+
+        const confirmed = confirm(
+            "Are you sure you want to submit your examination?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        const form = document.getElementById("answerForm");
+        const formData = new FormData(form);
+
+        try {
+            const response = await fetch(form.dataset.submitUrl, {
+                method: "POST",
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert(data.message);
+                window.location.href =
+                    data.redirect_url || "/student-dashboard/";
+            } else {
+                alert(data.error || "Submission failed.");
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert("Something went wrong during submission.");
+        }
+    }
+
+
+
+    
+</script>
+</body>
+</html>

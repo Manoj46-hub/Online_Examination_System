@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+        }
+
+        header {
+            background: #163b65;
+            color: white;
+            padding: 20px 35px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 25px;
+        }
+
+        .welcome {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px #ddd;
+        }
+
+        .exam-card {
+            margin-top: 25px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        button {
+            background: #163b65;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>Java Examination System</h2>
+</header>
+
+<div class="container">
+
+    <div class="welcome">
+        <h2>Welcome, {{ request.user.name }}!</h2>
+        <p>Roll Number: {{ request.user.username }}</p>
+        <p>You have successfully logged in.</p>
+    </div>
+
+    <div class="exam-card">
+        <h3>Available Examination</h3>
+        <p>Your examination details will appear here.</p>
+        <a href="{% url 'exam_verification' %}">
+            <button type="button">Enter Examination</button>
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>

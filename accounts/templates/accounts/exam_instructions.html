@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Instructions</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 750px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        h2 {
+            color: #163b65;
+        }
+
+        li {
+            margin: 15px 0;
+            line-height: 1.5;
+        }
+
+        .start {
+            display: block;
+            margin-top: 25px;
+            padding: 13px;
+            background: #163b65;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>{{ exam.title }} - Instructions</h2>
+
+    <p><strong>Duration:</strong> {{ exam.duration_minutes }} minutes</p>
+
+    <p><strong>Total Questions:</strong> 50</p>
+
+    <p><strong>Total Marks:</strong> 50</p>
+
+    <hr>
+
+    <h3>Important Instructions</h3>
+
+    <ol>
+        <li>Read every question carefully.</li>
+        <li>Each question carries one mark.</li>
+        <li>There is no negative marking.</li>
+        <li>Select one answer for each question.</li>
+        <li>You can navigate between questions.You can mark questions for review.</li>
+        <li>The examination will be submitted automatically when time expires.Do not refresh or close the examination window.</li>
+        <li>Don't switch between tabs the exam will end.</li>
+    </ol>
+
+    <a href="{% url 'start_exam' %}">
+        Start Examination
+    </a>
+
+</div>
+
+</body>
+</html>

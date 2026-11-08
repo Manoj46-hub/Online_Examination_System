@@ -1,0 +1,189 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Result</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f4f9;
+            color: #333;
+        }
+
+        header {
+            background: #172b4d;
+            color: white;
+            padding: 20px 30px;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 25px;
+        }
+
+        .result-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .heading {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .heading h2 {
+            color: #172b4d;
+        }
+
+        .score {
+            text-align: center;
+            background: #eaf2ff;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .score h1 {
+            color: #1769aa;
+            font-size: 45px;
+            margin: 5px;
+        }
+
+        .details {
+            margin-bottom: 25px;
+            line-height: 2;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat {
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            background: #f5f7fa;
+        }
+
+        .stat h3 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        .correct h3 {
+            color: #198754;
+        }
+
+        .wrong h3 {
+            color: #dc3545;
+        }
+
+        .unanswered h3 {
+            color: #6c757d;
+        }
+
+        .total h3 {
+            color: #1769aa;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .footer a {
+            display: inline-block;
+            background: #172b4d;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+
+        @media(max-width: 600px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    Java Online Examination System
+</header>
+
+<div class="container">
+
+    <div class="result-card">
+
+        <div class="heading">
+            <h2>Examination Result</h2>
+            <p>Your examination has been submitted successfully.</p>
+        </div>
+
+        <div class="details">
+            <strong>Student Name:</strong> {{ request.user.name }}<br>
+            <strong>Roll Number:</strong> {{ request.user.username }}<br>
+            <strong>Examination:</strong> {{ exam.title }}<br>
+            <strong>Submitted At:</strong> {{ attempt.submitted_at|date:"d M Y, h:i A" }}
+        </div>
+
+        <div class="score">
+            <p>Final Score</p>
+            <h1>{{ score }} / {{ total_questions }}</h1>
+            <p>Marks Obtained</p>
+        </div>
+
+        <div class="stats">
+
+            <div class="stat total">
+                <h3>{{ total_questions }}</h3>
+                Total Questions
+            </div>
+
+            <div class="stat correct">
+                <h3>{{ correct_answers }}</h3>
+                Correct Answers
+            </div>
+
+            <div class="stat wrong">
+                <h3>{{ wrong_answers }}</h3>
+                Wrong Answers
+            </div>
+
+            <div class="stat unanswered">
+                <h3>{{ unanswered_questions }}</h3>
+                Unanswered
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <a href="{% url 'student_dashboard' %}">
+                Back to Dashboard
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
