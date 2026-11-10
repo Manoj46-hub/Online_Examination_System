@@ -423,6 +423,7 @@ def exam_result(request, attempt_id):
         context
     )
 
+
 @login_required
 @require_POST
 def auto_submit_exam(request, attempt_id):
@@ -436,10 +437,15 @@ def auto_submit_exam(request, attempt_id):
         student=request.user
     )
 
-    if timezone.now() < attempt.end_time:
+    if attempt.status != 'IN_PROGRESS':
         return JsonResponse({
-            'error': 'Exam deadline has not arrived'
-        }, status=400)
+            'success': True,
+            'message': 'Exam already submitted',
+            'redirect_url': reverse(
+                'exam_result',
+                kwargs={'attempt_id': attempt.id}
+            )
+        })
 
     attempt = evaluate_and_submit_attempt(attempt)
 
@@ -452,4 +458,3 @@ def auto_submit_exam(request, attempt_id):
             kwargs={'attempt_id': attempt.id}
         )
     })
-

@@ -51,7 +51,7 @@ class Command(BaseCommand):
                 newline=''
             ) as file:
 
-                reader = csv.DictReader(file)
+                reader = csv.DictReader(file, delimiter='\t')
 
                 if not reader.fieldnames:
                     raise CommandError('CSV file is empty.')

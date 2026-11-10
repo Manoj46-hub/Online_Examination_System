@@ -4,7 +4,8 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from exams.models import Exam
-
+from datetime import datetime
+from django.utils import timezone
 
 def student_login(request):
     if request.method == 'POST':
@@ -93,8 +94,20 @@ def exam_instructions(request):
         )
         return redirect('student_dashboard')
 
+    start_datetime = timezone.make_aware(
+        datetime.combine(exam.exam_date, exam.start_time)
+    )
+
+    end_datetime = timezone.make_aware(
+        datetime.combine(exam.exam_date, exam.end_time)
+    )
+
     return render(
         request,
         'accounts/exam_instructions.html',
-        {'exam': exam}
+        {
+            'exam': exam,
+            'exam_start_iso': start_datetime.isoformat(),
+            'exam_end_iso': end_datetime.isoformat(),
+        }
     )

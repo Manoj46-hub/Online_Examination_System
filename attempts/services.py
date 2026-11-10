@@ -8,35 +8,17 @@ from django.utils import timezone
 from exams.models import Question
 from .models import ExamAttempt, StudentAnswer
 
-
 def select_exam_questions():
 
-    selected_questions = []
+    questions = list(Question.objects.all())
 
-    units = [
-        'UNIT_1',
-        'UNIT_2',
-        'UNIT_3',
-        'UNIT_4',
-        'UNIT_5',
-    ]
-
-    for unit in units:
-
-        questions = list(
-            Question.objects.filter(unit=unit)
+    if len(questions) < 50:
+        raise ValidationError(
+            f'Only {len(questions)} questions are available. '
+            'At least 50 are required.'
         )
 
-        if len(questions) < 10:
-            raise ValidationError(
-                f'{unit} has only {len(questions)} questions. '
-                'At least 10 are required.'
-            )
-
-        selected = random.sample(questions, 10)
-        selected_questions.extend(selected)
-
-    random.shuffle(selected_questions)
+    selected_questions = random.sample(questions, 50)
 
     return selected_questions
 

@@ -31,8 +31,28 @@
             line-height: 1.5;
         }
 
+        #countdown-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: #edf4fb;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        #countdown {
+            font-size: 28px;
+            font-weight: bold;
+            color: #163b65;
+            margin-top: 10px;
+        }
+
+        #exam-status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
         .start {
-            display: block;
+            display: none;
             margin-top: 25px;
             padding: 13px;
             background: #163b65;
@@ -58,6 +78,14 @@
 
     <hr>
 
+    <div id="countdown-box">
+        <h3>Examination Schedule</h3>
+        <p id="exam-status">Checking examination schedule...</p>
+        <div id="countdown"></div>
+    </div>
+
+    <hr>
+
     <h3>Important Instructions</h3>
 
     <ol>
@@ -65,16 +93,77 @@
         <li>Each question carries one mark.</li>
         <li>There is no negative marking.</li>
         <li>Select one answer for each question.</li>
-        <li>You can navigate between questions.You can mark questions for review.</li>
-        <li>The examination will be submitted automatically when time expires.Do not refresh or close the examination window.</li>
-        <li>Don't switch between tabs the exam will end.</li>
+        <li>You can navigate between questions and mark questions for review.</li>
+        <li>The examination will be submitted automatically when time expires. Do not refresh or close the examination window.</li>
+        <li>Switching tabs during the examination may automatically submit your exam.</li>
     </ol>
 
-    <a href="{% url 'start_exam' %}">
+    <a href="{% url 'start_exam' %}" class="start" id="start-button">
         Start Examination
     </a>
 
 </div>
+
+{{ exam_start_iso|json_script:"exam-start-time" }}
+{{ exam_end_iso|json_script:"exam-end-time" }}
+
+<script>
+    const startTime = new Date(
+        JSON.parse(document.getElementById("exam-start-time").textContent)
+    ).getTime();
+
+    const endTime = new Date(
+        JSON.parse(document.getElementById("exam-end-time").textContent)
+    ).getTime();
+
+    const statusText = document.getElementById("exam-status");
+    const countdown = document.getElementById("countdown");
+    const startButton = document.getElementById("start-button");
+
+    function updateCountdown() {
+        const now = Date.now();
+
+        if (now >= endTime) {
+            statusText.textContent = "Exam Window Closed";
+            countdown.textContent = "The scheduled examination time has ended.";
+            startButton.style.display = "none";
+            return;
+        }
+
+        if (now >= startTime) {
+            statusText.textContent = "Exam Started!";
+            countdown.textContent = "You can now begin your examination.";
+            startButton.style.display = "block";
+            return;
+        }
+
+        const difference = startTime - now;
+
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor(
+            (difference / (1000 * 60 * 60)) % 24
+        );
+        const minutes = Math.floor(
+            (difference / (1000 * 60)) % 60
+        );
+        const seconds = Math.floor(
+            (difference / 1000) % 60
+        );
+
+        statusText.textContent = "Examination Starts In";
+
+        countdown.textContent =
+            days + " Days : " +
+            hours + " Hours : " +
+            minutes + " Minutes : " +
+            seconds + " Seconds";
+
+        startButton.style.display = "none";
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+</script>
 
 </body>
 </html>

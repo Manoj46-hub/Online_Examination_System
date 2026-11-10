@@ -68,6 +68,7 @@
             line-height: 1.7;
             white-space: pre-wrap;
             margin-bottom: 25px;
+            white-space: pre-wrap;
         }
 
         .option {
@@ -322,6 +323,10 @@
 
     let timerInterval = null;
     let autoSubmitStarted = false;
+    let isNavigatingQuestion = false;
+
+    const tabSwitchKey = "tabSwitchCount_{{ attempt.id }}";
+    let tabSwitchCount = Number(sessionStorage.getItem(tabSwitchKey) || "0");
 
     async function autoSubmitExam() {
 
@@ -341,7 +346,7 @@
             const data = await response.json();
 
             if (data.success) {
-                alert("Time is over! Your exam has been submitted.");
+                alert("Your exam has been submitted.");
                 window.location.href =
                     data.redirect_url || "/student-dashboard/";
             } else {
@@ -354,6 +359,34 @@
             console.error(error);
         }
     }
+
+    document.addEventListener("visibilitychange", function () {
+
+        if (document.hidden) {
+
+            // Ignore normal navigation between exam questions
+            if (isNavigatingQuestion || autoSubmitStarted) return;
+
+            tabSwitchCount++;
+
+            sessionStorage.setItem(tabSwitchKey, tabSwitchCount);
+
+            if (tabSwitchCount >= 2) {
+                autoSubmitExam();
+            }
+
+        } else {
+
+            if (tabSwitchCount === 1) {
+                alert(
+                    "WARNING: You switched tabs! " +
+                    "Switching tabs again will automatically submit your exam."
+                );
+            }
+
+        }
+
+    });
 
     function updateTimer() {
 
@@ -379,11 +412,13 @@
     timerInterval = setInterval(updateTimer, 1000);
 
     function navigateTo(number) {
+
+        isNavigatingQuestion = true;
+
         window.location.href =
             "/exam/" + "{{ attempt.id }}" +
             "/question/" + number + "/";
     }
-
     function showMessage() {
         alert("Answer saving will be connected in the next step.");
     }
